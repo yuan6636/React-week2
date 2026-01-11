@@ -43,21 +43,24 @@ function App() {
   };
 
   const checkLogin = async () => {
-    try {
-      const token = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('access_token='))
-        .split('=')[1];
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('access_token='))
+      ?.split('=')[1];
 
-      if (token) {
-        axios.defaults.headers.common['Authorization'] = token;
-        await axios.post(`${API_BASE}/api/user/check`);
-        await getProducts();
-        setIsAuth(true);
-      }
+    if (!token) {
+      setIsAuth(false);
+      return;
+    }
+    try {
+      axios.defaults.headers.common['Authorization'] = token;
+      await axios.post(`${API_BASE}/api/user/check`);
+      await getProducts();
+      setIsAuth(true);
     } 
     catch (error) {
-      console.error('Token 驗證失敗:', error?.response?.data ?? '請重新登入');
+      setIsAuth(false);
+      console.error('Token 無效或過期:', error?.response?.data ?? '請重新登入');
     }
   };
 
